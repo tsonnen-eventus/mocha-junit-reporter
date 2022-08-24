@@ -335,11 +335,11 @@ MochaJUnitReporter.prototype.getTestcaseData = function(test, err) {
   // We need to merge console.logs and attachments into one <system-out> -
   //  see JUnit schema (only accepts 1 <system-out> per test).
   var systemOutLines = [];
-  if (this._options.outputs && (test.consoleOutputs && test.consoleOutputs.length > 0)) {
-    systemOutLines = systemOutLines.concat(test.consoleOutputs);
+  if (this._options.outputs && (test.timings.consoleOutputs && test.timings.consoleOutputs.length > 0)) {
+    systemOutLines = systemOutLines.concat(test.timings.consoleOutputs);
   }
-  if (this._options.attachments && test.attachments && test.attachments.length > 0) {
-    systemOutLines = systemOutLines.concat(test.attachments.map(
+  if (this._options.attachments && test.timings.attachments && test.timings.attachments.length > 0) {
+    systemOutLines = systemOutLines.concat(test.timings.attachments.map(
       function (file) {
         return '[[ATTACHMENT|' + file + ']]';
       }
@@ -349,8 +349,12 @@ MochaJUnitReporter.prototype.getTestcaseData = function(test, err) {
     testcase.testcase.push({'system-out': this.removeInvalidCharacters(stripAnsi(systemOutLines.join('\n')))});
   }
 
-  if (this._options.outputs && (test.consoleErrors && test.consoleErrors.length > 0)) {
+  if (this._options.outputs && (test.timings.consoleErrors && test.timings.consoleErrors.length > 0)) {
     testcase.testcase.push({'system-err': this.removeInvalidCharacters(stripAnsi(test.consoleErrors.join('\n')))});
+  }
+
+  if(test.timings.properties){
+    testcase.testcase.push({'properties': generateProperties(test.timings)});
   }
 
   if (err) {
